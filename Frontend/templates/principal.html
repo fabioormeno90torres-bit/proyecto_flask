@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Principal - Sistema Web</title>
+    <script>
+        // Guardián de seguridad: Si no hay sesión activa, rebota al login de inmediato
+        if (localStorage.getItem('session_token') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f8f9fa; }
+        .welcome-box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .nav-btn { display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; margin-right: 10px; }
+        .logout-btn { background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="welcome-box">
+        <h1>¡Bienvenido, <span id="nombre-usuario"></span>!</h1>
+        <p>Has ingresado correctamente al sistema de gestión de inventario.</p>
+        <hr>
+        <br>
+        <a href="buscador.html" class="nav-btn">Ir al Buscador de Productos</a>
+        <button onclick="cerrarSesion()" class="logout-btn">Cerrar Sesión</button>
+    </div>
+
+    <script>
+        // Inyecta el nombre del usuario logueado en la pantalla
+        document.getElementById('nombre-usuario').innerText = localStorage.getItem('user_name');
+
+        function cerrarSesion() {
+            localStorage.clear(); // Limpia toda la memoria de sesión
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

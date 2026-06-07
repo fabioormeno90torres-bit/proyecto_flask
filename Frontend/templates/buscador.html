@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Buscador de Productos</title>
+    <script>
+        if (localStorage.getItem('session_token') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f8f9fa; }
+        .container { background: white; padding: 30px; border-radius: 8px; max-width: 600px; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-box input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        .search-box button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .result-card { border: 1px solid #ddd; padding: 20px; border-radius: 5px; display: none; background: #fff; }
+        .error-message { color: red; display: none; margin-bottom: 15px; }
+        .back-link { display: inline-block; margin-top: 15px; color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Buscador de Productos</h2>
+        <div class="search-box">
+            <input type="text" id="codigoProducto" placeholder="Ingresa código (Ej: P001)">
+            <button onclick="buscarProducto()">Buscar</button>
+        </div>
+
+        <div id="error-search" class="error-message"></div>
+
+        <div id="resultado" class="result-card">
+            <h3>📦 <span id="res-nombre"></span></h3>
+            <p><strong>Código:</strong> <span id="res-codigo"></span></p>
+            <p><strong>Categoría:</strong> <span id="res-categoria"></span></p>
+            <p><strong>Descripción:</strong> <span id="res-descripcion"></span></p>
+            <p><strong>Precio:</strong> S/. <span id="res-precio"></span></p>
+            <p><strong>Stock disponible:</strong> <span id="res-stock"></span> unidades</p>
+        </div>
+
+        <a href="principal.html" class="back-link">← Volver al Panel Principal</a>
+    </div>
+
+    <script>
+        const BACKEND_URL = "https://flask-proyecto-1.onrender.com"; // Asegúrate de que coincida con tu Render
+
+        async function buscarProducto() {
+            const codigo = document.getElementById('codigoProducto').value;
+            const errorDiv = document.getElementById('error-search');
+            const resultCard = document.getElementById('resultado');
+
+            errorDiv.style.display = 'none';
+            resultCard.style.display = 'none';
+
+            if (!codigo.trim()) {
+                errorDiv.innerText = "Por favor, escribe un código.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/buscar_producto`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ codigo: codigo })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    // Mapeamos los datos JSON que devolvió la BD relacional SQLite en Render
+                    document.getElementById('res-nombre').innerText = result.data.nombre;
+                    document.getElementById('res-codigo').innerText = result.data.codigo;
+                    document.getElementById('res-categoria').innerText = result.data.categoria || 'Sin categoría';
+                    document.getElementById('res-descripcion').innerText = result.data.descripcion;
+                    document.getElementById('res-precio').innerText = result.data.precio;
+                    document.getElementById('res-stock').innerText = result.data.stock;
+
+                    resultCard.style.display = 'block';
+                } else {
+                    errorDiv.innerText = result.message || 'Producto no encontrado.';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (err) {
+                errorDiv.innerText = 'Error al consultar el inventario remoto.';
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
